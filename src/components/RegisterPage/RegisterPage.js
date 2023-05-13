@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 import { useForm } from "react-hook-form";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import md5 from "md5";
 
 function RegisterPage() {
   const {
@@ -21,6 +26,14 @@ function RegisterPage() {
         data.password
       );
       console.log(createdUser, "createdUser");
+
+      await updateProfile(createdUser.user, {
+        displayName: data.name,
+        photoURL: `http://gravatar.com/avatar/${md5(
+          createdUser.user.email
+        )}?d=identicon`,
+      });
+
       setLoading(false);
     } catch (error) {
       alert(error.message);
