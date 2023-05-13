@@ -1,10 +1,18 @@
 import React from "react";
 import { Link } from "react-router-dom/cjs/react-router-dom";
+import { useForm } from "react-hook-form";
 
 function RegisterPage() {
-  // const { register, watch } = useForm();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
+  const onSubmit = (data) => console.log(data);
 
-  // console.log(watch("email"));
+  console.log(watch("email"));
+  const password = watch("password");
 
   return (
     <>
@@ -21,7 +29,12 @@ function RegisterPage() {
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form className="space-y-6" action="#" method="POST">
+          <form
+            className="space-y-6"
+            action="#"
+            method="POST"
+            onSubmit={handleSubmit(onSubmit)}
+          >
             <div>
               <label
                 htmlFor="email"
@@ -36,13 +49,23 @@ function RegisterPage() {
                   type="email"
                   placeholder="이메일을 입력하세요."
                   autoComplete="email"
-                  required
-                  className="p-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="p-2 block w-full rounded-md border py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  {...register("email", {
+                    required: "이메일은 필수 입력 항목입니다.",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "유효한 이메일 주소를 입력해주세요.",
+                    },
+                  })}
                 />
-                {/* {errors.email && <p>This field is required</p>} */}
+                {errors.email && (
+                  <p className="relative text-red pl-4 mt-1 text-sm">
+                    <span className="absolute left-0 top-0 inline">⚠ </span>
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
             </div>
-
             <div>
               <label
                 htmlFor="name"
@@ -56,12 +79,23 @@ function RegisterPage() {
                   name="name"
                   type="text"
                   placeholder="이름을 입력하세요."
-                  required
-                  className="p-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  {...register("name", {
+                    required: "이름은 필수 입력 항목입니다.",
+                    maxLength: {
+                      value: 10,
+                      message: "이름은 10자 이하입니다.",
+                    },
+                  })}
+                  className="p-2 block w-full rounded-md border py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
+                {errors.name && (
+                  <p className="relative text-red pl-4 mt-1 text-sm">
+                    <span className="absolute left-0 top-0 inline">⚠ </span>
+                    {errors.name.message}
+                  </p>
+                )}
               </div>
             </div>
-
             <div>
               <div className="flex items-center justify-between">
                 <label
@@ -78,16 +112,27 @@ function RegisterPage() {
                   type="password"
                   autoComplete="current-password"
                   placeholder="비밀번호를 입력하세요."
-                  required
-                  className="p-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="p-2 block w-full rounded-md border py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  {...register("password", {
+                    required: "비밀번호는 필수 입력 항목입니다.",
+                    minLength: {
+                      value: 6,
+                      message: "비밀번호는 6자 이상입니다.",
+                    },
+                  })}
                 />
+                {errors.password && (
+                  <p className="relative text-red pl-4 mt-1 text-sm">
+                    <span className="absolute left-0 top-0 inline">⚠ </span>
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
             </div>
-
             <div>
               <div className="flex items-center justify-between">
                 <label
-                  htmlFor="passwordConfirm"
+                  htmlFor="confirmPassword"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
                   Password Confirm
@@ -95,14 +140,24 @@ function RegisterPage() {
               </div>
               <div className="mt-2">
                 <input
-                  id="passwordConfirm"
-                  name="passwordConfirm"
+                  id="confirmPassword"
+                  name="confirmPassword"
                   type="password"
                   autoComplete="current-password"
                   placeholder="비밀번호를 입력하세요."
-                  required
                   className="p-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  {...register("confirmPassword", {
+                    required: "비밀번호 확인은 필수 입력 항목입니다.",
+                    validate: (value) =>
+                      value === password || "비밀번호가 일치하지 않습니다.",
+                  })}
                 />
+                {errors.confirmPassword && (
+                  <p className="relative text-red pl-4 mt-1 text-sm">
+                    <span className="absolute left-0 top-0 inline">⚠ </span>
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
               </div>
             </div>
 
