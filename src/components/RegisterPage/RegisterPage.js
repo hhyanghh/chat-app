@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 import { useForm } from "react-hook-form";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
@@ -10,8 +10,10 @@ function RegisterPage() {
     getValues,
     formState: { errors },
   } = useForm();
+  const [loading, setLoading] = useState(false);
   const onSubmit = async (data) => {
     try {
+      setLoading(true);
       const auth = getAuth();
       let createdUser = await createUserWithEmailAndPassword(
         auth,
@@ -19,8 +21,10 @@ function RegisterPage() {
         data.password
       );
       console.log(createdUser, "createdUser");
+      setLoading(false);
     } catch (error) {
       alert(error.message);
+      setLoading(false);
     }
   };
 
@@ -180,6 +184,7 @@ function RegisterPage() {
               <button
                 type="submit"
                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                disabled={loading}
               >
                 Submit
               </button>

@@ -9,6 +9,7 @@ import promiseMiddleware from "redux-promise";
 import ReduxThunk from "redux-thunk";
 import Reducer from "./redux/reducers";
 import "bootstrap/dist/css/bootstrap.min.css";
+import app from "./firebase";
 
 const createStoreWithMiddleware = applyMiddleware(
   promiseMiddleware,
