@@ -1,18 +1,28 @@
 import React from "react";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 import { useForm } from "react-hook-form";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 function RegisterPage() {
   const {
     register,
     handleSubmit,
-    watch,
     getValues,
     formState: { errors },
   } = useForm();
-  const onSubmit = (data) => console.log(data);
-
-  console.log(watch("email"));
+  const onSubmit = async (data) => {
+    try {
+      const auth = getAuth();
+      let createdUser = await createUserWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      );
+      console.log(createdUser, "createdUser");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
 
   return (
     <>
