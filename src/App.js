@@ -7,14 +7,18 @@ import RegisterPage from "./components/RegisterPage/RegisterPage";
 
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser } from "./redux/actions/user_action";
 
 function App() {
   const history = useHistory();
+  let dispatch = useDispatch();
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log("user", user);
       if (user) {
         history.push("/");
+        dispatch(setUser(user));
       } else {
         history.push("/login");
       }
