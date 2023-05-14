@@ -7,6 +7,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import md5 from "md5";
+import { getDatabase, ref, set } from "firebase/database";
 
 function RegisterPage() {
   const {
@@ -32,6 +33,14 @@ function RegisterPage() {
         photoURL: `http://gravatar.com/avatar/${md5(
           createdUser.user.email
         )}?d=identicon`,
+      });
+
+      // firebase database에 저장
+      const database = getDatabase();
+      const userRef = ref(database, `users/${createdUser.user.uid}`);
+      await set(userRef, {
+        name: createdUser.user.displayName,
+        image: createdUser.user.photoURL,
       });
 
       setLoading(false);
