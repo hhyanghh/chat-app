@@ -10,6 +10,7 @@ import ReduxThunk from "redux-thunk";
 import Reducer from "./redux/reducers";
 import "bootstrap/dist/css/bootstrap.min.css";
 import app from "./firebase";
+import { BrowserRouter as Router } from "react-router-dom";
 
 const createStoreWithMiddleware = applyMiddleware(
   promiseMiddleware,
@@ -26,7 +27,9 @@ root.render(
           window.___REDUX_DEVTOOLS_EXTENSION__()
       )}
     >
-      <App />
+      <Router>
+        <App />
+      </Router>
     </Provider>
   </React.StrictMode>
 );
