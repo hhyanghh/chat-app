@@ -9,10 +9,12 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "./redux/actions/user_action";
+import Loading from "./commons/components/Loading";
 
 function App() {
   const history = useHistory();
   let dispatch = useDispatch();
+  const isLoading = useSelector((state) => state.user.isLoading);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log("user", user);
@@ -28,13 +30,18 @@ function App() {
       unsubscribe();
     };
   }, []);
-  return (
-    <Switch>
-      <Route exact path="/" component={ChatPage} />
-      <Route exact path="/login" component={LoginPage} />
-      <Route exact path="/register" component={RegisterPage} />
-    </Switch>
-  );
+
+  if (isLoading) {
+    return <Loading />;
+  } else {
+    return (
+      <Switch>
+        <Route exact path="/" component={ChatPage} />
+        <Route exact path="/login" component={LoginPage} />
+        <Route exact path="/register" component={RegisterPage} />
+      </Switch>
+    );
+  }
 }
 
 export default App;
