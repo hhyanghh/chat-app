@@ -8,7 +8,7 @@ import RegisterPage from "./components/RegisterPage/RegisterPage";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { useDispatch, useSelector } from "react-redux";
-import { setUser } from "./redux/actions/user_action";
+import { setUser, clearUser } from "./redux/actions/user_action";
 import Loading from "./commons/components/Loading";
 
 function App() {
@@ -23,6 +23,7 @@ function App() {
         dispatch(setUser(user));
       } else {
         history.push("/login");
+        dispatch(clearUser());
       }
     });
 
