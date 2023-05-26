@@ -4,7 +4,8 @@ import Dropdown from "react-bootstrap/Dropdown";
 import Image from "react-bootstrap/Image";
 import { useSelector } from "react-redux";
 import { signOut } from "firebase/auth";
-import { auth } from "../../../firebase";
+import firebase, { auth, storage } from "../../../firebase";
+import { ref, uploadBytesResumable } from "firebase/storage";
 
 function UserPanel() {
   // redex store에서 유저 정보 가져오기
@@ -26,7 +27,28 @@ function UserPanel() {
     inputOpenImageRef.current.click();
   };
 
-  const handleUploadImage = () => {};
+  const handleUploadImage = async (e) => {
+    // firebase storage에 저장
+    // firebase database에 업데이트
+    // 변경된 이미지 화면에 표시
+    const file = e.target.files[0];
+    const metadata = file.type;
+
+    // storage에 파일 저장하기
+    try {
+      const storageRef = ref(storage, `user_image/${user.uid}`);
+
+      const uploadTaskSnapshot = await uploadBytesResumable(
+        storageRef,
+        file,
+        metadata
+      );
+
+      console.log(uploadTaskSnapshot, "uploadTaskSnapshot");
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div>
       <h3>
