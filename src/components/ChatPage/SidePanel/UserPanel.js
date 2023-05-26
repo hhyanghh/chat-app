@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { signOut } from "firebase/auth";
 import { auth, storage, database } from "../../../firebase";
 import {
-  ref as astorageRef,
+  ref as storageRef,
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
@@ -43,11 +43,11 @@ function UserPanel() {
 
     // storage에 파일 저장하기
     try {
-      const storageRef = astorageRef(storage, `user_image/${user.uid}`);
+      const storageImgRef = storageRef(storage, `user_image/${user.uid}`);
       const userRef = databaseRef(database, `users/${user.uid}`);
 
       const uploadTaskSnapshot = await uploadBytesResumable(
-        storageRef,
+        storageImgRef,
         file,
         metadata
       );
@@ -56,14 +56,15 @@ function UserPanel() {
 
       const userImg = auth.currentUser;
 
-      // firebase database에 업데이트
+      // firebase 업데이트
       await updateProfile(userImg, {
         photoURL: downloadURL,
       });
 
+      // reducer 로 전체 상태관리, 화면에 표시
       dispatch(setPhotoURL(downloadURL));
 
-      // 변경된 이미지 화면에 표시
+      // 변경된 image database에 업데이트
       await update(userRef, {
         image: downloadURL,
       });
