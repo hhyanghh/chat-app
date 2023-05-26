@@ -16,11 +16,20 @@ export class ChatRooms extends Component {
     description: "",
     chatRoomsRef: ref(database, "chatRooms"),
     chatRooms: [],
+    firstLoad: true,
   };
 
   componentDidMount() {
     this.addChatRoomListner();
   }
+
+  setFirstChatRoom = () => {
+    const firstChatRoom = this.state.chatRooms[0];
+    if (this.state.firstLoad && this.state.chatRooms.length > 0) {
+      this.props.dispatch(setCurrentChatRoom(firstChatRoom));
+    }
+    this.setState({ firstLoad: false });
+  };
 
   addChatRoomListner = () => {
     let chatRoomsArray = [];
@@ -28,7 +37,9 @@ export class ChatRooms extends Component {
     onChildAdded(this.state.chatRoomsRef, (snapshot) => {
       chatRoomsArray.push(snapshot.val());
       console.log(chatRoomsArray);
-      this.setState({ chatRooms: chatRoomsArray });
+      this.setState({ chatRooms: chatRoomsArray }, () =>
+        this.setFirstChatRoom()
+      );
     });
   };
 
