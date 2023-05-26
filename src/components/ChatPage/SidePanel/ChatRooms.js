@@ -17,6 +17,7 @@ export class ChatRooms extends Component {
     chatRoomsRef: ref(database, "chatRooms"),
     chatRooms: [],
     firstLoad: true,
+    activeChatRoomId: "",
   };
 
   componentDidMount() {
@@ -27,6 +28,7 @@ export class ChatRooms extends Component {
     const firstChatRoom = this.state.chatRooms[0];
     if (this.state.firstLoad && this.state.chatRooms.length > 0) {
       this.props.dispatch(setCurrentChatRoom(firstChatRoom));
+      this.setState({ activeChatRoomId: firstChatRoom.id });
     }
     this.setState({ firstLoad: false });
   };
@@ -86,11 +88,21 @@ export class ChatRooms extends Component {
 
   changeChatRoom = (room) => {
     this.props.dispatch(setCurrentChatRoom(room));
+    this.setState({ activeChatRoomId: room.id });
   };
   renderChatRooms = (chatRooms) =>
     chatRooms.length > 0 &&
     chatRooms.map((room) => (
-      <li key={room.id} onClick={() => this.changeChatRoom(room)}>
+      <li
+        key={room.id}
+        onClick={() => this.changeChatRoom(room)}
+        style={{
+          backgroundColor:
+            room.id === this.state.activeChatRoomId && "#FFFFFF45",
+          padding: 4,
+          cursor: "pointer",
+        }}
+      >
         # {room.name}
       </li>
     ));
