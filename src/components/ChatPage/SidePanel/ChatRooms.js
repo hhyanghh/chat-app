@@ -7,6 +7,7 @@ import Form from "react-bootstrap/Form";
 import { connect } from "react-redux";
 import { database } from "../../../firebase";
 import { ref, push, set, onChildAdded } from "firebase/database";
+import { setCurrentChatRoom } from "../../../redux/actions/chatRoom_action";
 
 export class ChatRooms extends Component {
   state = {
@@ -71,9 +72,17 @@ export class ChatRooms extends Component {
     }
   };
   isFormValid = (name, description) => name && description;
+
+  changeChatRoom = (room) => {
+    this.props.dispatch(setCurrentChatRoom(room));
+  };
   renderChatRooms = (chatRooms) =>
     chatRooms.length > 0 &&
-    chatRooms.map((room) => <li key={room.id}># {room.name}</li>);
+    chatRooms.map((room) => (
+      <li key={room.id} onClick={() => this.changeChatRoom(room)}>
+        # {room.name}
+      </li>
+    ));
   render() {
     return (
       <div>
