@@ -2,14 +2,22 @@ import React, { useRef } from "react";
 import { BsFillChatDotsFill } from "react-icons/bs";
 import Dropdown from "react-bootstrap/Dropdown";
 import Image from "react-bootstrap/Image";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { signOut } from "firebase/auth";
-import firebase, { auth, storage } from "../../../firebase";
-import { ref, uploadBytesResumable } from "firebase/storage";
+import { auth, storage, database } from "../../../firebase";
+import {
+  ref as astorageRef,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { updateProfile } from "firebase/auth";
+import { setPhotoURL } from "../../../redux/actions/user_action";
+import { update, ref as databaseRef } from "firebase/database";
 
 function UserPanel() {
   // redex store에서 유저 정보 가져오기
   const user = useSelector((state) => state.user.currentUser);
+  const dispatch = useDispatch();
 
   const inputOpenImageRef = useRef();
 
@@ -29,14 +37,14 @@ function UserPanel() {
 
   const handleUploadImage = async (e) => {
     // firebase storage에 저장
-    // firebase database에 업데이트
-    // 변경된 이미지 화면에 표시
+
     const file = e.target.files[0];
     const metadata = file.type;
 
     // storage에 파일 저장하기
     try {
-      const storageRef = ref(storage, `user_image/${user.uid}`);
+      const storageRef = astorageRef(storage, `user_image/${user.uid}`);
+      const userRef = databaseRef(database, `users/${user.uid}`);
 
       const uploadTaskSnapshot = await uploadBytesResumable(
         storageRef,
@@ -44,7 +52,21 @@ function UserPanel() {
         metadata
       );
 
-      console.log(uploadTaskSnapshot, "uploadTaskSnapshot");
+      let downloadURL = await getDownloadURL(uploadTaskSnapshot.ref);
+
+      const userImg = auth.currentUser;
+
+      // firebase database에 업데이트
+      await updateProfile(userImg, {
+        photoURL: downloadURL,
+      });
+
+      dispatch(setPhotoURL(downloadURL));
+
+      // 변경된 이미지 화면에 표시
+      await update(userRef, {
+        image: downloadURL,
+      });
     } catch (error) {
       console.log(error);
     }

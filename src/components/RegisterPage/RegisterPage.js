@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 import { useForm } from "react-hook-form";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  updateProfile,
-} from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import md5 from "md5";
-import { getDatabase, ref, set } from "firebase/database";
+import { ref, set } from "firebase/database";
+import { auth, database } from "../../firebase";
 
 function RegisterPage() {
   const {
@@ -20,7 +17,7 @@ function RegisterPage() {
   const onSubmit = async (data) => {
     try {
       setLoading(true);
-      const auth = getAuth();
+
       let createdUser = await createUserWithEmailAndPassword(
         auth,
         data.email,
@@ -36,7 +33,7 @@ function RegisterPage() {
       });
 
       // firebase database에 저장
-      const database = getDatabase();
+
       const userRef = ref(database, `users/${createdUser.user.uid}`);
       await set(userRef, {
         name: createdUser.user.displayName,
