@@ -6,7 +6,7 @@ import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import { connect } from "react-redux";
 import { database } from "../../../firebase";
-import { ref, push, set } from "firebase/database";
+import { ref, push, set, onChildAdded } from "firebase/database";
 
 export class ChatRooms extends Component {
   state = {
@@ -14,6 +14,21 @@ export class ChatRooms extends Component {
     name: "",
     description: "",
     chatRoomsRef: ref(database, "chatRooms"),
+    chatRooms: [],
+  };
+
+  componentDidMount() {
+    this.addChatRoomListner();
+  }
+
+  addChatRoomListner = () => {
+    let chatRoomsArray = [];
+
+    onChildAdded(this.state.chatRoomsRef, (snapshot) => {
+      chatRoomsArray.push(snapshot.val());
+      console.log(chatRoomsArray);
+      this.setState({ chatRooms: chatRoomsArray });
+    });
   };
 
   handleClose = () => this.setState({ show: false });
@@ -56,6 +71,9 @@ export class ChatRooms extends Component {
     }
   };
   isFormValid = (name, description) => name && description;
+  renderChatRooms = (chatRooms) =>
+    chatRooms.length > 0 &&
+    chatRooms.map((room) => <li key={room.id}># {room.name}</li>);
   render() {
     return (
       <div>
@@ -68,12 +86,16 @@ export class ChatRooms extends Component {
           }}
         >
           <BiWinkSmile style={{ marginRight: 3 }} />
-          CHAT ROOMS (1)
+          CHAT ROOMS ({this.state.chatRooms.length})
           <AiOutlinePlusCircle
             style={{ position: "absolute", right: 0, cursor: "pointer" }}
             onClick={this.handleShow}
           />
         </div>
+
+        <ul style={{ listStyleType: "none", padding: 0 }}>
+          {this.renderChatRooms(this.state.chatRooms)}
+        </ul>
 
         {/* 모달영역 */}
         <Modal show={this.state.show} onHide={this.handleClose}>
