@@ -17,7 +17,6 @@ function App() {
   const isLoading = useSelector((state) => state.user.isLoading);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log("user", user);
       if (user) {
         history.push("/");
         dispatch(setUser(user));

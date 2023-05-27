@@ -43,7 +43,6 @@ export class ChatRooms extends Component {
 
     onChildAdded(this.state.chatRoomsRef, (snapshot) => {
       chatRoomsArray.push(snapshot.val());
-      console.log(chatRoomsArray);
       this.setState({ chatRooms: chatRoomsArray }, () =>
         this.setFirstChatRoom()
       );

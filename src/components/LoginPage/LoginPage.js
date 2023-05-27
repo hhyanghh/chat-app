@@ -21,7 +21,6 @@ function LoginPage() {
         data.password
       );
       // 로그인 성공 처리
-      console.log("로그인 성공:", userCredential.user);
 
       setLoading(false);
     } catch (error) {

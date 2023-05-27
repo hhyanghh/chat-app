@@ -23,7 +23,6 @@ function RegisterPage() {
         data.email,
         data.password
       );
-      console.log(createdUser, "createdUser");
 
       await updateProfile(createdUser.user, {
         displayName: data.name,
