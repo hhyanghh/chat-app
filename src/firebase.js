@@ -1,9 +1,5 @@
-import * as firebase from "firebase/app";
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import "firebase/auth";
-import "firebase/database";
-import "firebase/storage";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getDatabase } from "firebase/database";
@@ -20,13 +16,12 @@ const firebaseConfig = {
   measurementId: "G-76GGTFVQJ7",
 };
 
-// Initialize Firebase
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-// const analytics = getAnalytics(app);
-export const storage = getStorage();
-export const database = getDatabase();
-firebase.initializeApp(firebaseConfig);
+// Firebase 초기화
+const app = initializeApp(firebaseConfig);
 
-export const authService = getAuth();
-export default firebase;
+// 다른 Firebase 서비스 가져오기
+const auth = getAuth(app);
+const storage = getStorage(app);
+const database = getDatabase(app);
+
+export { app, auth, storage, database };
