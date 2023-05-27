@@ -6,7 +6,7 @@ import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import { connect } from "react-redux";
 import { database } from "../../../firebase";
-import { ref, push, set, onChildAdded } from "firebase/database";
+import { ref, push, set, onChildAdded, off } from "firebase/database";
 import { setCurrentChatRoom } from "../../../redux/actions/chatRoom_action";
 
 export class ChatRooms extends Component {
@@ -22,6 +22,11 @@ export class ChatRooms extends Component {
 
   componentDidMount() {
     this.addChatRoomListner();
+  }
+
+  componentWillUnmount() {
+    // listner 제거
+    off(this.state.chatRoomsRef);
   }
 
   setFirstChatRoom = () => {
