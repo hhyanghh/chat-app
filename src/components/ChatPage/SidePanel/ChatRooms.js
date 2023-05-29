@@ -11,6 +11,7 @@ import {
   setCurrentChatRoom,
   setPrivateChatRoom,
 } from "../../../redux/actions/chatRoom_action";
+import Badge from "react-bootstrap/Badge";
 
 export class ChatRooms extends Component {
   state = {
@@ -112,6 +113,9 @@ export class ChatRooms extends Component {
         }}
       >
         # {room.name}
+        <Badge variant="danger" style={{ float: "right", marginTop: "4px" }}>
+          1
+        </Badge>
       </li>
     ));
   render() {
