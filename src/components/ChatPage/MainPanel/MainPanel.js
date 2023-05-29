@@ -14,6 +14,9 @@ export class MainPanel extends Component {
     messages: [],
     messagesRef: ref(database, "messages"),
     messagesLoading: true,
+    searchTerm: "",
+    searchResults: [],
+    searchLoading: false,
   };
   componentDidMount() {
     const { chatRoom } = this.props;
@@ -22,13 +25,37 @@ export class MainPanel extends Component {
     }
   }
 
+  handleSearchMessages = () => {
+    const chatRoomMesages = [...this.state.messages];
+    const regex = new RegExp(this.state.searchTerm, "gi");
+    const searchResults = chatRoomMesages.reduce((acc, message) => {
+      if (
+        (message.content && message.content.match(regex)) ||
+        message.user.name.match(regex)
+      ) {
+        acc.push(message);
+      }
+      return acc;
+    }, []);
+    this.setState({ searchResults });
+  };
+
+  handleSearchChange = (e) => {
+    this.setState(
+      {
+        searchTerm: e.target.value,
+        searchLoading: true,
+      },
+      () => this.handleSearchMessages()
+    );
+  };
+
   addMessagesListners = (chatRoomId) => {
     // const messagesRef = ref(database, "messages", chatRoomId);
 
     let messagesArray = [];
     onChildAdded(child(this.state.messagesRef, chatRoomId), (DataSnapshot) => {
       messagesArray.push(DataSnapshot.val());
-      console.log("messagesArray:", messagesArray);
       this.setState({ messages: messagesArray, messagesLoading: false });
     });
   };
@@ -44,11 +71,10 @@ export class MainPanel extends Component {
     ));
 
   render() {
-    const { messages } = this.state;
-    console.log(messages, "messages");
+    const { messages, searchResults, searchTerm } = this.state;
     return (
       <div style={{ padding: "2rem 2rem 0 2rem" }}>
-        <MessageHeader />
+        <MessageHeader handleSearchChange={this.handleSearchChange} />
 
         <div
           style={{
@@ -61,7 +87,9 @@ export class MainPanel extends Component {
             overflowY: "auto",
           }}
         >
-          {this.renderMessages(messages)}
+          {searchTerm
+            ? this.renderMessages(searchResults)
+            : this.renderMessages(messages)}
         </div>
         <MessageForm />
       </div>

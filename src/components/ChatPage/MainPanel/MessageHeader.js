@@ -26,7 +26,7 @@ function CustomToggle({ children, eventKey }) {
   );
 }
 
-function MessageHeader() {
+function MessageHeader({ handleSearchChange }) {
   return (
     <div
       style={{
@@ -50,6 +50,7 @@ function MessageHeader() {
                 placeholder="Search Messages"
                 aria-label="Search"
                 aria-describedby="basic-addon1"
+                onChange={handleSearchChange}
               />
             </InputGroup>
           </Col>
