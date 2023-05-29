@@ -4,6 +4,10 @@ import { BiWinkSmile } from "react-icons/bi";
 import { database } from "../../../firebase";
 import { ref, onChildAdded, child } from "firebase/database";
 import { connect } from "react-redux";
+import {
+  setCurrentChatRoom,
+  setPrivateChatRoom,
+} from "../../../redux/actions/chatRoom_action";
 
 export class DirectMessages extends Component {
   state = {
@@ -41,6 +45,13 @@ export class DirectMessages extends Component {
 
   changeChatRoom = (user) => {
     const chatRoomId = this.getChatRoomId(user.uid);
+    const chatRoomData = {
+      id: chatRoomId,
+      name: user.name,
+    };
+
+    this.props.dispatch(setCurrentChatRoom(chatRoomData));
+    this.props.dispatch(setPrivateChatRoom(true));
   };
   renderDirectMessages = (users) =>
     users.length > 0 &&

@@ -7,7 +7,10 @@ import Form from "react-bootstrap/Form";
 import { connect } from "react-redux";
 import { database } from "../../../firebase";
 import { ref, push, set, onChildAdded, off } from "firebase/database";
-import { setCurrentChatRoom } from "../../../redux/actions/chatRoom_action";
+import {
+  setCurrentChatRoom,
+  setPrivateChatRoom,
+} from "../../../redux/actions/chatRoom_action";
 
 export class ChatRooms extends Component {
   state = {
@@ -92,6 +95,7 @@ export class ChatRooms extends Component {
 
   changeChatRoom = (room) => {
     this.props.dispatch(setCurrentChatRoom(room));
+    this.props.dispatch(setPrivateChatRoom(false));
     this.setState({ activeChatRoomId: room.id });
   };
   renderChatRooms = (chatRooms) =>
