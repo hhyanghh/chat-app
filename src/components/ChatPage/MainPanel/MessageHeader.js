@@ -5,10 +5,12 @@ import Col from "react-bootstrap/Col";
 import { Image } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
-import { BsSearch, BsUnlock, BsHeart } from "react-icons/bs";
+import { BsSearch, BsHeart } from "react-icons/bs";
+import { AiOutlineUnlock, AiOutlineLock } from "react-icons/ai";
 import Accordion from "react-bootstrap/Accordion";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
 import Card from "react-bootstrap/Card";
+import { useSelector } from "react-redux";
 
 function CustomToggle({ children, eventKey }) {
   const decoratedOnClick = useAccordionButton(eventKey, () =>
@@ -27,6 +29,10 @@ function CustomToggle({ children, eventKey }) {
 }
 
 function MessageHeader({ handleSearchChange }) {
+  const chatRoom = useSelector((state) => state.chatRoom.currentChatRoom);
+  const isPrivateChatRoom = useSelector(
+    (state) => state.chatRoom.isPrivateChatRoom
+  );
   return (
     <div
       style={{
@@ -58,8 +64,8 @@ function MessageHeader({ handleSearchChange }) {
         <Row>
           <Col>
             <h2 style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <BsUnlock />
-              <div>Chat Room Name</div>
+              {isPrivateChatRoom ? <AiOutlineUnlock /> : <AiOutlineLock />}
+              <div>{chatRoom && chatRoom.name}</div>
               <BsHeart style={{ marginLeft: "8px" }} />
             </h2>
           </Col>
