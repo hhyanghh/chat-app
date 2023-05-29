@@ -1,15 +1,11 @@
 import React, { Component } from "react";
-import { FaRegSmileWink } from "react-icons/fa";
-import { FaPlus } from "react-icons/fa";
-import Modal from "react-bootstrap/Modal";
+import { BiWinkSmile } from "react-icons/bi";
+import { AiOutlinePlusCircle } from "react-icons/ai";
 import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
-import Badge from "react-bootstrap/Badge";
 import { connect } from "react-redux";
-import {
-  setCurrentChatRoom,
-  setPrivateChatRoom,
-} from "../../../redux/actions/chatRoom_action";
+import { database } from "../../../firebase";
 import {
   getDatabase,
   ref,
@@ -20,8 +16,13 @@ import {
   update,
   off,
 } from "firebase/database";
+import {
+  setCurrentChatRoom,
+  setPrivateChatRoom,
+} from "../../../redux/actions/chatRoom_action";
+import Badge from "react-bootstrap/Badge";
 
-export class ChatRooms extends Component {
+export class ChatRoomsDelete extends Component {
   state = {
     show: false,
     name: "",
@@ -35,10 +36,11 @@ export class ChatRooms extends Component {
   };
 
   componentDidMount() {
-    this.AddChatRoomsListeners();
+    this.addChatRoomListner();
   }
 
   componentWillUnmount() {
+    // listner 제거
     off(this.state.chatRoomsRef);
   }
 
@@ -51,7 +53,7 @@ export class ChatRooms extends Component {
     this.setState({ firstLoad: false });
   };
 
-  AddChatRoomsListeners = () => {
+  addChatRoomListner = () => {
     let chatRoomsArray = [];
 
     onChildAdded(this.state.chatRoomsRef, (DataSnapshot) => {
@@ -59,33 +61,82 @@ export class ChatRooms extends Component {
       this.setState({ chatRooms: chatRoomsArray }, () =>
         this.setFirstChatRoom()
       );
-      this.addNotificationListener(DataSnapshot.key);
+      this.addNotificationListner(DataSnapshot.key);
     });
   };
 
-  addNotificationListener = (chatRoomId) => {
+  // addNotificationListner = (chatRoomId) => {
+  //   this.state.messagesRef.child(chatRoomId).on("value", (DataSnapshot) => {
+  //     if (this.props.chatRoom) {
+  //       this.handleNotification(
+  //         chatRoomId,
+  //         this.props.chatRoom.id, // 현재방
+  //         this.state.notifications,
+  //         DataSnapshot
+  //       );
+  //     }
+  //   });
+  // };
+  addNotificationListner = (chatRoomId) => {
     let { messagesRef } = this.state;
     onValue(child(messagesRef, chatRoomId), (DataSnapshot) => {
       if (this.props.chatRoom) {
-        // chatRoom은 rudex에서 가져옴
         this.handleNotification(
           chatRoomId,
           this.props.chatRoom.id,
           this.state.notifications,
-          DataSnapshot // 메시지 정보들
+          DataSnapshot
         );
       }
     });
   };
 
+  // handleNotification = (
+  //   chatRoomId,
+  //   currentChatRoomId,
+  //   notifications,
+  //   DataSnapshot
+  // ) => {
+  //   // 이미 notifications state 안에 알림 정보가 들어있는 채팅방과 그렇지 않은 채팅방을 나눠주기
+  //   let index = notifications.findIndex(
+
+  //     if (index === -1) {
+  //        // notifications state 안에 해당 채팅방의 알림 정보가 없을 때
+  //        notifications.push({
+  //         id: chatRoomId,
+  //         total: DataSnapshot.numChildren,
+  //         lastKnownTotal: DataSnapshot.numChildren(),
+  //         count: 0
+  //        })
+  //     } else {
+  //       // notifications state 안에 해당 채팅방의 알림 정보가 있을 때
+
+  //       // 상대방이 채팅 보내는 그 해당 채팅방에 있지 않을 때
+  //       if (chatRoomId !== currentChatRoomId) {
+  //         lastTotal = notifications[index].lastKnownTotal;
+
+  //         // count 구하기
+  //         // 현재 총 메시지 개수 - 이전에 확인한 충 메시지 개수 > 0
+  //         if (DataSnapshot.numChildren() - lastTotal > 0) {
+  //           notifications[index].count = DataSnapshot.numChildren() - lastTotal;
+  //         }
+  //       }
+  //     }
+
+  //     // total property에 현재 메시지 개수를 넣어주기
+  //     notifications[index].total = DataSnapshot.numChildren();
+  //   )
+
+  //   // 목표는 notifications에 방 하나하나의 맞는 알림 정보를 넣어주기
+  // };
+
   handleNotification = (
-    chatRoomId, // 하나하나의 chatRoomId
-    currentChatRoomId, // 현재의 chatRoomId
-    notifications, // 알림의 정보들 배열
+    chatRoomId,
+    currentChatRoomId,
+    notifications,
     DataSnapshot
   ) => {
     let lastTotal = 0;
-
     // 이미 notifications state 안에 알림 정보가 들어있는 채팅방과 그렇지 않은 채팅방을 나눠주기
     let index = notifications.findIndex(
       (notification) => notification.id === chatRoomId
@@ -118,7 +169,7 @@ export class ChatRooms extends Component {
       notifications[index].total = DataSnapshot.size;
     }
     //목표는 방 하나 하나의 맞는 알림 정보를 notifications state에  넣어주기
-    this.setState({ notifications: [...notifications] });
+    this.setState({ notifications });
   };
 
   handleClose = () => this.setState({ show: false });
@@ -126,15 +177,17 @@ export class ChatRooms extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
+
     const { name, description } = this.state;
 
     if (this.isFormValid(name, description)) {
       this.addChatRoom();
     }
   };
-
   addChatRoom = async () => {
-    const key = push(this.state.chatRoomsRef).key;
+    const chatRoomsRef = ref(database, "chatRooms");
+    const newChatRoomRef = push(chatRoomsRef);
+    const key = newChatRoomRef.key;
     const { name, description } = this.state;
     const { user } = this.props;
     const newChatRoom = {
@@ -148,7 +201,7 @@ export class ChatRooms extends Component {
     };
 
     try {
-      await update(child(this.state.chatRoomsRef, key), newChatRoom);
+      await set(newChatRoomRef, newChatRoom);
       this.setState({
         name: "",
         description: "",
@@ -158,7 +211,6 @@ export class ChatRooms extends Component {
       alert(error);
     }
   };
-
   isFormValid = (name, description) => name && description;
 
   changeChatRoom = (room) => {
@@ -166,38 +218,25 @@ export class ChatRooms extends Component {
     this.props.dispatch(setPrivateChatRoom(false));
     this.setState({ activeChatRoomId: room.id });
   };
-
-  getNotificationCount = (room) => {
-    //해당 채팅방의 count수를 구하는 중입니다.
-    let count = 0;
-
-    this.state.notifications.forEach((notification) => {
-      if (notification.id === room.id) {
-        count = notification.count;
-      }
-    });
-    if (count > 0) return count;
-  };
-
   renderChatRooms = (chatRooms) =>
     chatRooms.length > 0 &&
     chatRooms.map((room) => (
       <li
         key={room.id}
+        onClick={() => this.changeChatRoom(room)}
         style={{
           backgroundColor:
-            room.id === this.state.activeChatRoomId && "#ffffff45",
+            room.id === this.state.activeChatRoomId && "#FFFFFF45",
+          padding: 4,
           cursor: "pointer",
         }}
-        onClick={() => this.changeChatRoom(room)}
       >
         # {room.name}
-        <Badge style={{ float: "right", marginTop: "4px" }} variant="danger">
-          {this.getNotificationCount(room)}
+        <Badge variant="danger" style={{ float: "right", marginTop: "4px" }}>
+          1
         </Badge>
       </li>
     ));
-
   render() {
     return (
       <div>
@@ -209,15 +248,11 @@ export class ChatRooms extends Component {
             alignItems: "center",
           }}
         >
-          <FaRegSmileWink style={{ marginRight: 3 }} />
+          <BiWinkSmile style={{ marginRight: 3 }} />
           CHAT ROOMS ({this.state.chatRooms.length})
-          <FaPlus
+          <AiOutlinePlusCircle
+            style={{ position: "absolute", right: 0, cursor: "pointer" }}
             onClick={this.handleShow}
-            style={{
-              position: "absolute",
-              right: 0,
-              cursor: "pointer",
-            }}
           />
         </div>
 
@@ -225,14 +260,14 @@ export class ChatRooms extends Component {
           {this.renderChatRooms(this.state.chatRooms)}
         </ul>
 
-        {/* ADD CHAT ROOM MODAL */}
+        {/* 모달영역 */}
         <Modal show={this.state.show} onHide={this.handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Create a chat room</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form onSubmit={this.handleSubmit}>
-              <Form.Group controlId="formBasicEmail">
+              <Form.Group className="mb-3" controlId="formBasicEmail">
                 <Form.Label>방 이름</Form.Label>
                 <Form.Control
                   onChange={(e) => this.setState({ name: e.target.value })}
@@ -241,7 +276,7 @@ export class ChatRooms extends Component {
                 />
               </Form.Group>
 
-              <Form.Group controlId="formBasicPassword">
+              <Form.Group className="mb-3" controlId="formBasicPassword">
                 <Form.Label>방 설명</Form.Label>
                 <Form.Control
                   onChange={(e) =>
