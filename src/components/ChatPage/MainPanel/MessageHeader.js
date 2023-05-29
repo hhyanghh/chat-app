@@ -45,6 +45,7 @@ function MessageHeader({ handleSearchChange }) {
   const [isFavorited, setIsFavorited] = useState(false);
   const usersRef = ref(getDatabase(), "users");
   const user = useSelector((state) => state.user.currentUser);
+  const userPosts = useSelector((state) => state.chatRoom.userPosts);
 
   useEffect(() => {
     if (chatRoom && user) {
@@ -80,6 +81,24 @@ function MessageHeader({ handleSearchChange }) {
       });
     }
   };
+
+  const renderUserPosts = (userPosts) =>
+    Object.entries(userPosts)
+      .sort((a, b) => b[1].count - a[1].count)
+      .map(([key, val], i) => (
+        <div key={i}>
+          <img
+            src={val.image}
+            alt={val.name}
+            style={{ borderRadius: 25 }}
+            width={48}
+            height={48}
+          />
+          {key}
+          <p>{val.count} 개</p>
+        </div>
+      ));
+
   return (
     <div
       style={{
@@ -166,7 +185,9 @@ function MessageHeader({ handleSearchChange }) {
                   <CustomToggle eventKey="0">Count Posts</CustomToggle>
                 </Card.Header>
                 <Accordion.Collapse eventKey="0">
-                  <Card.Body>Hello! I'm the body</Card.Body>
+                  <Card.Body>
+                    {userPosts && renderUserPosts(userPosts)}
+                  </Card.Body>
                 </Accordion.Collapse>
               </Card>
             </Accordion>
