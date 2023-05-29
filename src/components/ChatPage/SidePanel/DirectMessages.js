@@ -13,6 +13,7 @@ export class DirectMessages extends Component {
   state = {
     usersRef: ref(database, "users"),
     users: [],
+    activeChatRoom: "",
   };
   componentDidMount() {
     if (this.props.user.uid) {
@@ -52,11 +53,24 @@ export class DirectMessages extends Component {
 
     this.props.dispatch(setCurrentChatRoom(chatRoomData));
     this.props.dispatch(setPrivateChatRoom(true));
+    this.setActiveChatRoom(user.uid);
+  };
+
+  setActiveChatRoom = (userId) => {
+    this.setState({ activeChatRoom: userId });
   };
   renderDirectMessages = (users) =>
     users.length > 0 &&
     users.map((user) => (
-      <li key={user.uid} onClick={() => this.changeChatRoom(user)}>
+      <li
+        key={user.uid}
+        onClick={() => this.changeChatRoom(user)}
+        style={{
+          backgroundColor:
+            user.uid === this.state.activeChatRoom && "#FFFFFF45",
+          cursor: "pointer",
+        }}
+      >
         # {user.name}
       </li>
     ));
