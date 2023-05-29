@@ -1,16 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { Image } from "react-bootstrap";
 import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
-import { BsSearch, BsHeart } from "react-icons/bs";
+import { BsSearch, BsHeart, BsHeartFill } from "react-icons/bs";
 import { AiOutlineUnlock, AiOutlineLock } from "react-icons/ai";
 import Accordion from "react-bootstrap/Accordion";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
 import Card from "react-bootstrap/Card";
 import { useSelector } from "react-redux";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  remove,
+  child,
+  update,
+} from "firebase/database";
 
 function CustomToggle({ children, eventKey }) {
   const decoratedOnClick = useAccordionButton(eventKey, () =>
@@ -33,6 +41,29 @@ function MessageHeader({ handleSearchChange }) {
   const isPrivateChatRoom = useSelector(
     (state) => state.chatRoom.isPrivateChatRoom
   );
+
+  const [isFavorited, setIsFavorited] = useState(false);
+  const usersRef = ref(getDatabase(), "users");
+  const user = useSelector((state) => state.user.currentUser);
+
+  const handleFavorite = () => {
+    if (isFavorited) {
+      setIsFavorited((prev) => !prev);
+      remove(child(usersRef, `${user.uid}/favorited/${chatRoom.id}`));
+    } else {
+      setIsFavorited((prev) => !prev);
+      update(child(usersRef, `${user.uid}/favorited`), {
+        [chatRoom.id]: {
+          name: chatRoom.name,
+          description: chatRoom.description,
+          createdBy: {
+            name: chatRoom.createdBy.name,
+            image: chatRoom.createdBy.image,
+          },
+        },
+      });
+    }
+  };
   return (
     <div
       style={{
@@ -66,7 +97,14 @@ function MessageHeader({ handleSearchChange }) {
             <h2 style={{ display: "flex", alignItems: "center", gap: "4px" }}>
               {isPrivateChatRoom ? <AiOutlineUnlock /> : <AiOutlineLock />}
               <div>{chatRoom && chatRoom.name}</div>
-              <BsHeart style={{ marginLeft: "8px" }} />
+              {!isPrivateChatRoom && (
+                <span
+                  style={{ cursor: "pointer", marginLeft: "8px" }}
+                  onClick={handleFavorite}
+                >
+                  {isFavorited ? <BsHeartFill /> : <BsHeart />}
+                </span>
+              )}
             </h2>
           </Col>
           <Col>
