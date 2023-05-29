@@ -8,6 +8,7 @@ import { connect } from "react-redux";
 export class DirectMessages extends Component {
   state = {
     usersRef: ref(database, "users"),
+    users: [],
   };
   componentDidMount() {
     if (this.props.user.uid) {
@@ -30,12 +31,13 @@ export class DirectMessages extends Component {
       }
     });
   };
-  renderDirectMessages = () => {
-    // list 그리기 (가입된 다른 유저들)
-  };
+  renderDirectMessages = (users) =>
+    users.length > 0 &&
+    users.map((user) => <li key={user.uid}># {user.name}</li>);
 
   render() {
-    console.log("users", this.state.users);
+    const { users } = this.state;
+    console.log("users", users);
     return (
       <div>
         <div
@@ -51,7 +53,7 @@ export class DirectMessages extends Component {
         </div>
 
         <ul style={{ listStyleType: "none", padding: 0 }}>
-          {this.renderDirectMessages()}
+          {this.renderDirectMessages(users)}
         </ul>
       </div>
     );
