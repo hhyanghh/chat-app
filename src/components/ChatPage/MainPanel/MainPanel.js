@@ -5,6 +5,7 @@ import MessageForm from "./MessageForm";
 import { connect } from "react-redux";
 import { ref, onChildAdded, child } from "firebase/database";
 import { database } from "../../../firebase";
+import { setUserPosts } from "../../../redux/actions/chatRoom_action";
 
 // const database = getDatabase();
 
@@ -57,7 +58,26 @@ export class MainPanel extends Component {
     onChildAdded(child(this.state.messagesRef, chatRoomId), (DataSnapshot) => {
       messagesArray.push(DataSnapshot.val());
       this.setState({ messages: messagesArray, messagesLoading: false });
+
+      this.userPostCount(messagesArray);
     });
+  };
+
+  userPostCount = (messages) => {
+    let userPosts = messages.reduce((acc, message) => {
+      if (message.user.name in acc) {
+        acc[message.user.name].count += 1;
+      } else {
+        acc[message.user.name] = {
+          image: message.user.image,
+          count: 1,
+        };
+      }
+      return acc;
+    }, {});
+
+    // MessageHeader에서 사용할꺼기 때문에 redux 에 저장
+    this.props.dispatch(setUserPosts(userPosts));
   };
 
   renderMessages = (messages) =>
