@@ -6,11 +6,12 @@ import Col from "react-bootstrap/Col";
 import { database, storage } from "../../../firebase";
 import { ref, push, set, serverTimestamp } from "firebase/database";
 import { useSelector } from "react-redux";
-import { ref as sRef, uploadBytes } from "firebase/storage";
+import { ref as sRef, uploadBytesResumable } from "firebase/storage";
 
 function MessageForm() {
   const chatRoom = useSelector((state) => state.chatRoom.currentChatRoom);
   const user = useSelector((state) => state.user.currentUser);
+  const [percentage, setPercentage] = useState(0);
   const [content, setContent] = useState("");
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -68,14 +69,23 @@ function MessageForm() {
     inputOpenImageRef.current.click();
   };
 
-  const handleUploadImage = async (e) => {
+  const handleUploadImage = (e) => {
     const file = e.target.files[0];
     const filePath = `/message/public/${file.name}`;
     const metadata = file.type;
     const storageImageRef = sRef(storage, filePath);
 
     try {
-      await uploadBytes(storageImageRef, file, metadata);
+      // 파일 먼저 스토리지에 저장
+      let uploadTask = uploadBytesResumable(storageImageRef, file, metadata);
+      // 파일 저장되는 percentage 구하기
+      console.log(uploadTask);
+      uploadTask.on("state_changed", (snapshot) => {
+        const percentage = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
+        setPercentage(percentage);
+      });
     } catch (error) {
       alert(error);
     }
@@ -93,7 +103,13 @@ function MessageForm() {
           />
         </Form.Group>
       </Form>
-      <ProgressBar variant="warning" label="60%" now={60} />
+      {percentage !== 0 && percentage !== 100 && (
+        <ProgressBar
+          variant="warning"
+          label={`${percentage}%`}
+          now={percentage}
+        />
+      )}
       <div>
         {errors.map((errorMsg) => (
           <p style={{ color: "red" }} key={errorMsg}>
