@@ -6,7 +6,11 @@ import Col from "react-bootstrap/Col";
 import { database, storage } from "../../../firebase";
 import { ref, push, set, serverTimestamp } from "firebase/database";
 import { useSelector } from "react-redux";
-import { ref as sRef, uploadBytesResumable } from "firebase/storage";
+import {
+  ref as sRef,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
 
 function MessageForm() {
   const chatRoom = useSelector((state) => state.chatRoom.currentChatRoom);
@@ -75,17 +79,33 @@ function MessageForm() {
     const metadata = file.type;
     const storageImageRef = sRef(storage, filePath);
 
+    setLoading(true);
+
     try {
       // 파일 먼저 스토리지에 저장
       let uploadTask = uploadBytesResumable(storageImageRef, file, metadata);
       // 파일 저장되는 percentage 구하기
-      console.log(uploadTask);
-      uploadTask.on("state_changed", (snapshot) => {
-        const percentage = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        );
-        setPercentage(percentage);
-      });
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const percentage = Math.round(
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          );
+          setPercentage(percentage);
+        },
+        (err) => {
+          console.log(err);
+          setLoading(false);
+        },
+        () => {
+          // 저장이 다 된 후에 파일 메시지 전송 (database에 저장)
+          // 저장된 파일을 다운로드 받을 수 있는 URL 가져오기
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            push(messagesRef, createMessage(downloadURL)); // 수정된 부분
+            setLoading(false);
+          });
+        }
+      );
     } catch (error) {
       alert(error);
     }
@@ -123,6 +143,7 @@ function MessageForm() {
             onClick={handleSubmit}
             className="message-form-button"
             style={{ width: "100%" }}
+            disabled={loading ? true : false}
           >
             SEND
           </button>
@@ -132,6 +153,7 @@ function MessageForm() {
             className="message-form-button"
             style={{ width: "100%" }}
             onClick={handleOpenImageRef}
+            disabled={loading ? true : false}
           >
             UPLOAD
           </button>
@@ -139,6 +161,7 @@ function MessageForm() {
       </Row>
 
       <input
+        accept="image/jpeg, image/png, image/jpg"
         style={{ display: "none" }}
         type="file"
         ref={inputOpenImageRef}

@@ -45,7 +45,7 @@ function Message({ message, user }) {
               rounded
               style={{ maxWidth: "300px" }}
               alt="이미지"
-              src={message.img}
+              src={message.image}
             />
           ) : (
             <p>{message.content}</p>
