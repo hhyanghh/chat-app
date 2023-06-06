@@ -152,14 +152,14 @@ function MessageHeader({ handleSearchChange }) {
             >
               <Image
                 roundedCircle
-                src={chatRoom?.createdBy.image}
+                src={chatRoom?.createdBy?.image}
                 style={{
                   marginRight: "4px",
                   width: "36px",
                   height: "36px",
                 }}
               />
-              <div>{chatRoom?.createdBy.name}</div>
+              <div>{chatRoom?.createdBy?.name}</div>
             </div>
           </Col>
         </Row>
