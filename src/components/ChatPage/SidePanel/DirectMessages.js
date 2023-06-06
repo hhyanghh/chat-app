@@ -16,7 +16,7 @@ export class DirectMessages extends Component {
     activeChatRoom: "",
   };
   componentDidMount() {
-    if (this.props.user.uid) {
+    if (this.props.user?.uid) {
       this.addUserListners(this.props.user.uid);
     }
   }
